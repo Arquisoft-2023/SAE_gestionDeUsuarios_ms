@@ -61,15 +61,16 @@ class InformacionAcademica(Base):
 
 t_usuario_rol = Table(
     'usuario_rol', metadata,
-    Column('rol_id', ForeignKey('rol.rol_id'), nullable=False),
-    Column('usuario_un', ForeignKey('usuarios.usuario_un'), nullable=False)
+    Column('rol_id', ForeignKey('rol.rol_id'), primary_key=True, nullable=False),
+    Column('usuario_un', ForeignKey('usuarios.usuario_un'), primary_key=True, nullable=False)
 )
 
 
 t_historia_academica_estudiantes = Table(
     'historia_academica_estudiantes', metadata,
-    Column('cod_historia_acdemica', ForeignKey('informacion_academica.historia_academica'), nullable=False),
-    Column('usuario_un', ForeignKey('usuarios.usuario_un'), nullable=False)
+    Column('cod_historia_acdemica', ForeignKey('informacion_academica.historia_academica'), primary_key=True, nullable=False),
+    Column('usuario_un', ForeignKey('usuarios.usuario_un'), primary_key=True, nullable=False)
 )
+
 
 metadata.create_all(engine)

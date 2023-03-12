@@ -37,15 +37,15 @@ class ProgramasAcademicos(Base):
 
 t_departamento_programas = Table(
     'departamento_programas', metadata,
-    Column('codigo_programa', ForeignKey('programas_academicos.codigo_programa'), nullable=False),
-    Column('id_departamento', ForeignKey('departamentos.id_departamento'), nullable=False)
+    Column('codigo_programa', ForeignKey('programas_academicos.codigo_programa'), primary_key=True, nullable=False),
+    Column('id_departamento', ForeignKey('departamentos.id_departamento'), primary_key=True, nullable=False)
 )
 
 
 t_facultad_departamentos = Table(
     'facultad_departamentos', metadata,
-    Column('id_facultad', ForeignKey('facultad.id_facultad'), nullable=False),
-    Column('id_departamento', ForeignKey('departamentos.id_departamento'), nullable=False)
+    Column('id_facultad', ForeignKey('facultad.id_facultad'), primary_key=True, nullable=False),
+    Column('id_departamento', ForeignKey('departamentos.id_departamento'), primary_key=True, nullable=False)
 )
 
 metadata.create_all(engine)

@@ -68,7 +68,7 @@ t_usuario_rol = Table(
 
 t_historia_academica_estudiantes = Table(
     'historia_academica_estudiantes', metadata,
-    Column('cod_historia_acdemica', ForeignKey('informacion_academica.historia_academica'), primary_key=True, nullable=False),
+    Column('cod_historia_academica', ForeignKey('informacion_academica.historia_academica'), primary_key=True, nullable=False),
     Column('usuario_un', ForeignKey('usuarios.usuario_un'), primary_key=True, nullable=False)
 )
 

@@ -8,3 +8,11 @@ class FacultadEsquema(BaseModel):
 
     class Config:
         orm_mode = True
+
+class FacultadDepartamentoEsquema(BaseModel):
+
+    id_facultad : int
+    id_departamento : str
+
+    class Config:
+        orm_mode = True

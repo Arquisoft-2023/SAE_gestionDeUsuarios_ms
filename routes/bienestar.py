@@ -112,6 +112,7 @@ def eliminar_rol(rol_a_econtrar: int):
         
     return session.query(Rol).all()
 
+
 #Usuarios Roles
 
 @bienestar.post("/bienestar/usuarios/rol/{usuario_un}&{rol_id}")
@@ -139,6 +140,7 @@ def modificar_usuario_y_rol(usuario_un_a_buscar: str, rol_id_nuevo: int):
     conn.execute(t_usuario_rol.update().values(rol_id=rol_id_nuevo).where(t_usuario_rol.c.usuario_un == usuario_un_a_buscar))
     conn.commit()
     return "usuario y rol modificado"
+
 
 #Departamentos
 
@@ -171,6 +173,7 @@ def eliminar_departamento(departamento_a_econtrar: int):
             
     return session.query(Departamentos).all()
 
+
 #Facultades
 
 @bienestar.get("/bienestar/informacionUniversidad/facultades", response_model= list[FacultadEsquema])
@@ -202,7 +205,9 @@ def eliminar_facultad(facultad_a_econtrar: int):
                 
     return session.query(Facultad).all()
 
+
 #Programas facultad
+
 @bienestar.get("/bienestar/informacionUniversidad/programasAcademicos", response_model= list[ProgramaEsquema])
 def leer_programas_academicos():
     result = session.query(ProgramasAcademicos).all()
@@ -233,6 +238,7 @@ def eliminar_programa(programa_a_econtrar: int):
                         
     return session.query(ProgramasAcademicos).all()
 
+
 #DepartamentoProgramas
 
 @bienestar.get("/bienestar/informacionUniversidad/departamentoProgramas", response_model= list[DepartamentoProgramasEsquema])
@@ -240,8 +246,113 @@ def leer_departamento_programas():
     result = session.query(t_departamento_programas).all()
     return result
 
-@bienestar.post("/bienestar/informacionUniversidad/departamentoProgramas")
+@bienestar.post("/bienestar/informacionUniversidad/departamentoProgramas", response_model= list[DepartamentoProgramasEsquema])
 def agregar_departamento_programa(codigo_programa_nu: int, id_departamento_nu: int):
-    session.add(t_departamento_programas(codigo_programa=codigo_programa_nu,id_departamento=id_departamento_nu))
+    session.execute(t_departamento_programas.insert().values({"codigo_programa":codigo_programa_nu,"id_departamento":id_departamento_nu}))
     session.commit()
-    return session.query(t_departamento_programas).get(codigo_programa_nu,id_departamento_nu)
+    
+    return  session.query(t_departamento_programas).all()
+
+@bienestar.put("/bienestar/informacionUniversidad/departamentoProgramas/{departamento_id}&{programa_id}", response_model= list[DepartamentoProgramasEsquema])
+def modificar_departamento_programa(codigo_programa_vi: int, departamento_nuevo: int):
+
+    session.query(t_departamento_programas).filter(t_departamento_programas.c.codigo_programa == codigo_programa_vi).update({"id_departamento":departamento_nuevo})
+    session.commit()
+
+    return  session.query(t_departamento_programas).all()
+
+@bienestar.delete("/bienestar/informacionUniversidad/departamentoProgramas/{departamento_id}&{programa_id}")
+def eliminar_departamento_programa(codigo_programa_vi: int, departamento_nuevo: int):
+    session.query(t_departamento_programas).filter(t_departamento_programas.c.codigo_programa == codigo_programa_vi).delete()
+    session.commit()
+    return  session.query(t_departamento_programas).all()
+
+
+#FacultadDepartamento
+
+@bienestar.get("/bienestar/informacionUniversidad/facultadDepartamentos", response_model= list[FacultadDepartamentoEsquema])
+def leer_facultad_departamentos():
+    result = session.query(t_facultad_departamentos).all()
+    return result
+
+@bienestar.post("/bienestar/informacionUniversidad/facultadDepartamentos", response_model= FacultadDepartamentoEsquema)
+def agregar_facultad_departamento(id_facultad_nu: int, id_departamento_nu: int):
+    session.execute(t_facultad_departamentos.insert().values({"id_facultad":id_facultad_nu,"id_departamento":id_departamento_nu}))
+    session.commit()
+    
+    return  session.query(t_facultad_departamentos).filter((t_facultad_departamentos.c.id_departamento == id_departamento_nu) & (t_facultad_departamentos.c.id_facultad == id_facultad_nu)).first()
+
+@bienestar.put("/bienestar/informacionUniversidad/facultadDepartamentos/{facultad_id}&{departamento_id}", response_model= FacultadDepartamentoEsquema)
+def modificar_facultad_departamento(id_facultad_vi: int, departamento_nuevo: int):
+    
+    session.query(t_facultad_departamentos).filter(t_facultad_departamentos.c.id_facultad == id_facultad_vi).update({"id_departamento":departamento_nuevo})
+    session.commit()
+    
+    return  session.query(t_facultad_departamentos).filter(t_facultad_departamentos.c.id_facultad == id_facultad_vi).first()
+
+@bienestar.delete("/bienestar/informacionUniversidad/facultadDepartamentos/{facultad_id}&{departamento_id}")
+def eliminar_facultad_departamento(id_facultad_eliminar: int, departamento_eliminar: int):
+    session.query(t_facultad_departamentos).filter(t_facultad_departamentos.c.id_facultad == id_facultad_eliminar, t_facultad_departamentos.c.id_departamento == departamento_eliminar).delete()
+    session.commit()
+    return  session.query(t_facultad_departamentos).all()
+
+    session.query(InformacionPersonal).filter(InformacionPersonal.usuario_un == usuario_un).delete()
+    session.commit()
+    return session.query(InformacionPersonal).all()
+
+
+#InformacionAcademica
+
+@bienestar.get("/bienestar/estudiante/informacionAcademica/{usuario_un}", response_model= InformacionAcademicaEsquema)
+def leer_informacion_academica_del_estudiante(hist_academica: int):
+    result = session.query(InformacionAcademica).get(hist_academica)
+    return result
+
+@bienestar.post("/bienestar/estudiante/informacionAcademica", response_model= InformacionAcademicaEsquema)
+def ingresar_informacion_academica_del_estudiante(nueva_informacion: InformacionAcademicaEsquema):
+    
+    conn.execute(InformacionAcademica.__table__.insert().values(nueva_informacion.dict()))
+    conn.commit()
+    
+    return session.query(InformacionAcademica).get(nueva_informacion.historia_academica)
+
+@bienestar.put("/bienestar/estudiante/informacionAcademica/{hist_academica}", response_model= InformacionAcademicaEsquema)
+def modificar_informacion_academica_del_estudiante(nueva_informacion: InformacionAcademicaEsquema):
+        
+        session.query(InformacionAcademica).filter(InformacionAcademica.historia_academica == nueva_informacion.historia_academica).update(nueva_informacion.dict())
+        session.commit()
+        
+        return session.query(InformacionAcademica).get(nueva_informacion.historia_academica)
+
+@bienestar.delete("/bienestar/estudiante/informacionAcademica/{hist_academica}")
+def eliminar_informacion_academica_del_estudiante(hist_academica: int):
+    session.query(InformacionAcademica).filter(InformacionAcademica.historia_academica == hist_academica).delete()
+    session.commit()
+    return session.query(InformacionAcademica).all()
+
+#HistorriaAcademicaEstudiante
+
+@bienestar.get("/bienestar/estudiante/historiaAcademicaEstudiante", response_model= list[InformacionAcademicaEstudianteEsquema])
+def leer_lista_historiaAcademica():
+    result = session.query(t_historia_academica_estudiantes).all()
+    return result
+
+@bienestar.post("/bienestar/estudiante/historiaAcademicaEstudiante", response_model= InformacionAcademicaEstudianteEsquema)
+def agregar_historiaAcademica_a_estudiante(historiaAcademica: int, usuario_un: str):
+    session.execute(t_historia_academica_estudiantes.insert().values({"cod_historia_academica":historiaAcademica,"usuario_un":usuario_un}))
+    session.commit()
+    
+    return  session.query(t_historia_academica_estudiantes).filter(t_historia_academica_estudiantes.c.usuario_un == usuario_un).first()
+
+@bienestar.put("/bienestar/estudiante/historiaAcademicaEstudiante/{usuario_un}", response_model= InformacionAcademicaEstudianteEsquema)
+def modificar_historiaAcademica_de_estudiante(usuario_un: str, historiaAcademica: int):
+    session.query(t_historia_academica_estudiantes).filter(t_historia_academica_estudiantes.c.usuario_un == usuario_un).update({"cod_historia_academica":historiaAcademica})
+    session.commit()
+    
+    return  session.query(t_historia_academica_estudiantes).filter(t_historia_academica_estudiantes.c.usuario_un == usuario_un).first()
+
+@bienestar.delete("/bienestar/estudiante/historiaAcademicaEstudiante/{usuario_un}")
+def eliminar_historiaAcademica_de_estudiante(usuario_un: str):
+    session.query(t_historia_academica_estudiantes).filter(t_historia_academica_estudiantes.c.usuario_un == usuario_un).delete()
+    session.commit()
+    return session.query(t_historia_academica_estudiantes).all()

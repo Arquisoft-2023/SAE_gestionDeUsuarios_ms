@@ -12,7 +12,7 @@ data_base_name = config('DATABASE_NAME')
 
 data_base_url= f"postgresql+psycopg2://{data_base_user}:{data_base_password}@{data_base_host}:{data_base_port}/{data_base_name}"
 
-engine = create_engine(data_base_url)
+engine = create_engine(data_base_url,isolation_level="AUTOCOMMIT")
 conn = engine.connect()
 Session = sessionmaker(bind = engine)
 session = Session()

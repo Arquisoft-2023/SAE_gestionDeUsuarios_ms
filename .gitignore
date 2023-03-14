@@ -1,3 +1,5 @@
 .env
 __pycache__/
 gdu-env
+*.yml
+dockerfile

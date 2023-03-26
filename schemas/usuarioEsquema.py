@@ -13,6 +13,13 @@ class UsuarioEsquema(BaseModel):
     class Config:
         orm_mode = True
 
+class UsuarioRolEsquema(BaseModel):
+    rol_id : int
+    usuario_un : str
+
+    class Config:
+        orm_mode = True
+
 class InformacionPersonalEsquema(BaseModel):
 
     fecha_nacimiento : datetime.date 

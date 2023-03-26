@@ -78,23 +78,31 @@ def modificar_datos_usuario(usuario_un_a_econtrar: str,datos_nuevos_usuario: Usu
     
     return session.query(Usuarios).get(usuario_a_modificar.usuario_un)
 
+@bienestar.delete("/bienestar/usuarios/{usuario_un}")
+def eliminar_usuario(usuario_un_a_econtrar: str):
+        
+    usuario_a_eliminar = session.query(Usuarios).get(usuario_un_a_econtrar)
+    session.delete(usuario_a_eliminar)
+    session.commit()
+        
+    return session.query(Usuarios).all()
+
 
 
 #Roles
 
-@bienestar.get("/bienestar/usuarios/rol", response_model= list[RolEsquema])
-def leer_roles():
-    result = session.query(Rol).all()
-    return result
+@bienestar.get("/bienestar/usuariosRol", response_model=list[RolEsquema])
+def leer_base_datos_roles():
+    return session.query(Rol).all()
 
-@bienestar.post("/bienestar/usuarios/rol", response_model= list[RolEsquema])
+@bienestar.post("/bienestar/usuariosRol", response_model= list[RolEsquema])
 def ingresar_rol(nuevo_rol: str):
 
     conn.execute(Rol.__table__.insert().values({"rol":nuevo_rol}))
     conn.commit()
     return session.query(Rol).all()
 
-@bienestar.put("/bienestar/usuarios/rol/{rol_id}", response_model= RolEsquema)
+@bienestar.put("/bienestar/usuariosRol/{rol_id}", response_model= RolEsquema)
 def modificar_nombre_rol(rol_a_econtrar: int,datos_nuevo_rol: str):
     
     rol_a_modificar = session.query(Rol).get(rol_a_econtrar)
@@ -103,7 +111,7 @@ def modificar_nombre_rol(rol_a_econtrar: int,datos_nuevo_rol: str):
     
     return session.query(Rol).get(rol_a_econtrar)
 
-@bienestar.delete("/bienestar/usuarios/rol/{rol_id}")
+@bienestar.delete("/bienestar/usuariosRol/{rol_id}")
 def eliminar_rol(rol_a_econtrar: int):
         
     rol_a_eliminar = session.query(Rol).get(rol_a_econtrar)
@@ -115,18 +123,18 @@ def eliminar_rol(rol_a_econtrar: int):
 
 #Usuarios Roles
 
-@bienestar.post("/bienestar/usuarios/rol/{usuario_un}&{rol_id}")
+@bienestar.post("/bienestar/usuariosRoles/{usuario_un}&{rol_id}", response_model= list[UsuarioRolEsquema])
 def ingresar_usuario_rol(usuario_un_a_buscar: str, rol_id_a_buscar: int):
     
     conn.execute(t_usuario_rol.insert().values(usuario_un=usuario_un_a_buscar,rol_id=rol_id_a_buscar))
     conn.commit()
-    return ast.literal_eval(str(conn.execute(t_usuario_rol.select()).fetchall()))
+    return session.query(t_usuario_rol).all()
 
-@bienestar.get("/bienestar/usuarios/rol/usuariosRol")
+@bienestar.get("/bienestar/usuariosRoles/usuariosRol", response_model= list[UsuarioRolEsquema])
 def leer_roles_de_usuarios():
-    return ast.literal_eval(str(conn.execute(t_usuario_rol.select()).fetchall()))
+    return session.query(t_usuario_rol).all()
 
-@bienestar.delete("/bienestar/usuarios/rol/usuariosRol/{usuario_un}")
+@bienestar.delete("/bienestar/usuariosRoles/usuariosRol/{usuario_un}")
 def eliminar_usuario_y_rol(usuario_un_elim: str):
         
     usuario_y_rol_a_eliminar = conn.execute(t_usuario_rol.delete().where(t_usuario_rol.c.usuario_un == usuario_un_elim))
@@ -134,12 +142,12 @@ def eliminar_usuario_y_rol(usuario_un_elim: str):
         
     return "Usuario y rol eliminado"
 
-@bienestar.put("/bienestar/usuarios/rol/usuariosRol/{usuario_un}&{rol_id}")
+@bienestar.put("/bienestar/usuariosRoles/usuariosRol/{usuario_un}&{rol_id}")
 def modificar_usuario_y_rol(usuario_un_a_buscar: str, rol_id_nuevo: int):
 
     conn.execute(t_usuario_rol.update().values(rol_id=rol_id_nuevo).where(t_usuario_rol.c.usuario_un == usuario_un_a_buscar))
     conn.commit()
-    return "usuario y rol modificado"
+    return "Usuario y rol modificado correctamente"
 
 
 #Departamentos
@@ -206,14 +214,14 @@ def eliminar_facultad(facultad_a_econtrar: int):
     return session.query(Facultad).all()
 
 
-#Programas facultad
+#Programas
 
 @bienestar.get("/bienestar/informacionUniversidad/programasAcademicos", response_model= list[ProgramaEsquema])
 def leer_programas_academicos():
     result = session.query(ProgramasAcademicos).all()
     return result
 
-@bienestar.post("/bienestar/informacionUniversidad/programasAcademicos")
+@bienestar.post("/bienestar/informacionUniversidad/programasAcademicos", response_model=ProgramaEsquema)
 def agregar_programa_academico(programa_nuevo: str, codigo_programa_nuevo: int):
     session.add(ProgramasAcademicos(nombre_programa=programa_nuevo,codigo_programa=codigo_programa_nuevo))
     session.commit()

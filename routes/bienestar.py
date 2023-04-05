@@ -68,7 +68,6 @@ def modificar_estado_usuario(usuario_un_a_buscar: str, estado_nuevo: bool):
 def modificar_datos_usuario(usuario_un_a_econtrar: str,datos_nuevos_usuario: UsuarioEsquema):
     
     usuario_a_modificar = session.query(Usuarios).get(usuario_un_a_econtrar)
-    usuario_a_modificar.usuario_un =datos_nuevos_usuario.dict().get("usuario_un")
     usuario_a_modificar.estado =datos_nuevos_usuario.dict().get("estado")
     usuario_a_modificar.nombres =datos_nuevos_usuario.dict().get("nombres")
     usuario_a_modificar.apellidos =datos_nuevos_usuario.dict().get("apellidos")

@@ -3,8 +3,8 @@ from pydantic  import BaseModel
 
 class ProgramaEsquema(BaseModel):
 
-    codigo_programa = int
-    nombre_programa = str
+    codigo_programa : int
+    nombre_programa : str
 
     class Config:
         orm_mode = True

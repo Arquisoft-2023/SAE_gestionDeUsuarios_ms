@@ -1,0 +1,61 @@
+version: "3"
+
+services:
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    container_name: visualizador_de_base_de_datos
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "4000:80"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    container_name: sae_gestion_de_usuarios_db
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      DATABASE_USER: "postgres"
+      DATABASE_PASSWORD: "password"
+      DATABASE_HOST: "localhost"
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: "SAE_gestionDeUsuarios_db"
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  gestionusuarios:
+    build: .
+    container_name: sae_gestion_de_usuarios_ms
+    restart: always
+    environment:
+      DATABASE_USER: "postgres"
+      DATABASE_PASSWORD: "password"
+      DATABASE_HOST: "postgres"
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: "SAE_gestionDeUsuarios_db"
+    ports:
+      - "127.0.0.2:3021:80"
+    depends_on:
+      - postgres
+
+  apigateway:
+    build:
+      context: /home/jordan_esc/Proyectos/1d_ag/SAE_ag/
+      dockerfile: Dockerfile
+    container_name: sae_ag
+    restart: always
+    ports:
+      - "127.0.0.8:3121:80"
+    depends_on:
+    - gestionusuarios
+
+
+volumes:
+  postgres-data:

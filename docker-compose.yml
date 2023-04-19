@@ -1,5 +1,10 @@
 version: "3"
 
+networks:
+  default:
+    external:
+      name: sae_ag_default
+
 services:
 
   pgadmin4:
@@ -44,18 +49,6 @@ services:
       - "127.0.0.2:3021:80"
     depends_on:
       - postgres
-
-  apigateway:
-    build:
-      context: /home/jordan_esc/Proyectos/1d_ag/SAE_ag/
-      dockerfile: Dockerfile
-    container_name: sae_ag
-    restart: always
-    ports:
-      - "127.0.0.8:3121:80"
-    depends_on:
-    - gestionusuarios
-
 
 volumes:
   postgres-data:

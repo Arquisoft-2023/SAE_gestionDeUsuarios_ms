@@ -1,14 +1,16 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from decouple import config
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 
 
-data_base_user = config('DATABASE_USER')
-data_base_password = config('DATABASE_PASSWORD')
-data_base_host = config('DATABASE_HOST')
-data_base_port = config('DATABASE_PORT')
-data_base_name = config('DATABASE_NAME')
+data_base_user = str(os.environ.get('DATABASE_USER_DB'))
+data_base_password = str(os.environ.get('DATABASE_PASSWORD_DB'))
+data_base_host = str(os.environ.get('DATABASE_HOST_DB'))
+data_base_port = str(os.environ.get('DATABASE_PORT_DB'))
+data_base_name = str(os.environ.get('DATABASE_NAME_DB'))
 
 data_base_url= f"postgresql+psycopg2://{data_base_user}:{data_base_password}@{data_base_host}:{data_base_port}/{data_base_name}"
 

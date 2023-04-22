@@ -2,21 +2,22 @@ version: "3"
 
 services:
 
-  pgadmin4:
-    image: dpage/pgadmin4
-    container_name: visualizador_de_base_de_datos
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
-      PGADMIN_DEFAULT_PASSWORD: "admin"
-    ports:
-      - "4000:80"
-    depends_on:
-      - postgres
-    networks:
-      nodes-networks:
-        aliases:
-          - visualizador_de_base_de_datos
+  
+  #pgadmin4:
+  #  image: dpage/pgadmin4
+  #  container_name: visualizador_de_base_de_datos
+  #  restart: always
+  #  environment:
+  #    PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+  #    PGADMIN_DEFAULT_PASSWORD: "admin"
+  #  ports:
+  #    - "4000:80"
+  #  depends_on:
+  #    - postgres
+  #  networks:
+  #    nodes-networks:
+  #      aliases:
+  #        - visualizador_de_base_de_datos
 
   postgres:
     image: postgres

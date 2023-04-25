@@ -37,6 +37,7 @@ services:
   gestionusuarios:
     build: .
     container_name: sae_gestion_de_usuarios_ms
+    image: sae_gestion_de_usuarios_ms
     restart: always
     env_file:
       - .env

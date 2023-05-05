@@ -34,7 +34,7 @@ services:
         aliases:
           - sae_gestion_de_usuarios_db
 
-  gestionusuarios:
+  sae_gestion_de_usuarios_ms:
     build: .
     container_name: sae_gestion_de_usuarios_ms
     image: sae_gestion_de_usuarios_ms

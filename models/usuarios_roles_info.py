@@ -61,7 +61,7 @@ class InformacionAcademica(Base):
 
 t_usuario_rol = Table(
     'usuario_rol', metadata,
-    Column('rol_id', ForeignKey('rol.rol_id'), primary_key=True, nullable=False),
+    Column('rol_id', ForeignKey('rol.rol_id'), primary_key=False, nullable=False),
     Column('usuario_un', ForeignKey('usuarios.usuario_un'), primary_key=True, nullable=False)
 )
 

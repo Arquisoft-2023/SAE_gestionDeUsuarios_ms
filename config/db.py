@@ -12,8 +12,7 @@ data_base_host = str(os.environ.get('DATABASE_HOST_DB'))
 data_base_port = str(os.environ.get('DATABASE_PORT_DB'))
 data_base_name = str(os.environ.get('DATABASE_NAME_DB'))
 
-#data_base_url= f"postgresql+psycopg2://{data_base_user}:{data_base_password}@{data_base_host}:{data_base_port}/{data_base_name}"
-data_base_url= f"postgresql+psycopg2://{data_base_user}:{data_base_password}@{data_base_host}:5432/{data_base_name}"
+data_base_url= f"postgresql+psycopg2://{data_base_user}:{data_base_password}@{data_base_host}:{data_base_port}/{data_base_name}"
 
 
 

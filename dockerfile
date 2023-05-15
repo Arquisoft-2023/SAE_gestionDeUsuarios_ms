@@ -8,7 +8,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 80
+# Establece el puerto de escucha
+ENV PORT=8080
 
-#CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80"]
-CMD ["uvicorn", "app:app"]
+# Expone el puerto en el que se ejecuta la aplicación
+EXPOSE $PORT
+
+# Establece el comando para ejecutar la aplicación
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "$PORT"]

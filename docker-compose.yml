@@ -42,7 +42,7 @@ services:
     env_file:
       - .env
     ports:
-      - "127.0.0.2:3021:80"
+      - "127.0.0.2:3021:8080"
     depends_on:
       - postgres
     networks:

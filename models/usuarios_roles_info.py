@@ -13,7 +13,7 @@ metadata = Base.metadata
 class Rol(Base):
     __tablename__ = 'rol'
 
-    rol = Column(String, nullable=False)
+    rol = Column(String, unique=True, nullable=False)
     rol_id = Column(Integer, primary_key=True,autoincrement=True)
 
     usuarios = relationship('Usuarios', secondary='usuario_rol')
@@ -21,7 +21,7 @@ class Rol(Base):
 class Usuarios(Base):
     __tablename__ = 'usuarios'
 
-    usuario_un = Column(String, primary_key=True)
+    usuario_un = Column(String, primary_key=True, unique=True, nullable=False)
     estado = Column(Boolean, nullable=False)
     nombres = Column(String, nullable=False)
     apellidos = Column(String, nullable=False)
@@ -43,7 +43,7 @@ class InformacionPersonal(Usuarios):
     nombre_apellido_acudiente = Column(String, nullable=False)
     relacion_acudiente = Column(String, nullable=False)
     telefono_acudiente = Column(String, nullable=False)
-    usuario_un = Column(ForeignKey('usuarios.usuario_un'), primary_key=True)
+    usuario_un = Column(ForeignKey('usuarios.usuario_un'), primary_key=True, unique=True, nullable=False)
 
 class InformacionAcademica(Base):
     __tablename__ = 'informacion_academica'
@@ -62,7 +62,7 @@ class InformacionAcademica(Base):
 t_usuario_rol = Table(
     'usuario_rol', metadata,
     Column('rol_id', ForeignKey('rol.rol_id'), primary_key=False, nullable=False),
-    Column('usuario_un', ForeignKey('usuarios.usuario_un'), primary_key=True, nullable=False)
+    Column('usuario_un', ForeignKey('usuarios.usuario_un'), primary_key=True, unique=True, nullable=False)
 )
 
 

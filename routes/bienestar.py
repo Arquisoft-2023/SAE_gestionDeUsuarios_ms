@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 #Conexion a la base de datos
 from  config.db import conn
@@ -23,46 +23,38 @@ bienestar = APIRouter()
 
 #Usuarios
 
-@bienestar.get("/bienestar/usuarios", response_model= list[UsuarioEsquema])
+@bienestar.get("/bienestar/usuarios", response_model= list[UsuarioEsquema], tags=["Usuarios"], summary="Retorna todos los usuarios",status_code=200)
 def leer_usuarios():
-    result = session.query(Usuarios).all()
-    return result
+    data = session.query(Usuarios).all()
+    return data
 
-@bienestar.get("/bienestar/usuarios/{usuario_un}", response_model= UsuarioEsquema)
+@bienestar.get("/bienestar/usuarios/{usuario_un}", response_model= UsuarioEsquema, tags=["Usuarios"], summary="Retorna un usuario",status_code=200)
 def buscar_un_usuario(usuario_un_a_buscar: str):
-    return session.query(Usuarios).get(usuario_un_a_buscar)
+    
+    data = session.query(Usuarios).get(usuario_un_a_buscar)
+    if data == None:
+        raise HTTPException(status_code=404, detail="El usuario no existe")
+    else:
+        result = data
+    
+    return result
 
 @bienestar.post("/bienestar/usuarios", response_model= UsuarioEsquema)
 def ingresar_usuario(nuevo: UsuarioEsquema):
 
-    #Forma de hacerlo con SQLAlchemy Session - mas largo pero formal
-
-    #datos_nuevo_usuario = Usuarios(
-    #    usuario_un = nuevo.usuario_un,
-    #    estado = nuevo.estado,
-    #    nombres = nuevo.nombres,
-    #    apellidos = nuevo.apellidos,
-    #    documento = nuevo.documento,
-    #    tipo_documento = nuevo.tipo_documento
-    #)
-
-    #session.commit()
-    
-    #result = session.query(Usuarios).all()
-    #return result
-
     conn.execute(Usuarios.__table__.insert().values(nuevo.dict()))
     conn.commit()
-
     return session.query(Usuarios).get(nuevo.usuario_un)
+
 
 @bienestar.put("/bienestar/usuarios/{usuario_un}&{estado}", response_model= UsuarioEsquema)
 def modificar_estado_usuario(usuario_un_a_buscar: str, estado_nuevo: bool):
-    
+
     usuario_a_modificar = session.query(Usuarios).get(usuario_un_a_buscar)
     usuario_a_modificar.estado = estado_nuevo
     session.commit()
     return session.query(Usuarios).get(usuario_un_a_buscar)
+
 
 @bienestar.put("/bienestar/usuarios/{usuario_un}", response_model= UsuarioEsquema)
 def modificar_datos_usuario(usuario_un_a_econtrar: str,datos_nuevos_usuario: UsuarioEsquema):
@@ -76,15 +68,17 @@ def modificar_datos_usuario(usuario_un_a_econtrar: str,datos_nuevos_usuario: Usu
     session.commit()
     
     return session.query(Usuarios).get(usuario_a_modificar.usuario_un)
+    
 
 @bienestar.delete("/bienestar/usuarios/{usuario_un}")
 def eliminar_usuario(usuario_un_a_econtrar: str):
-        
+
     usuario_a_eliminar = session.query(Usuarios).get(usuario_un_a_econtrar)
     session.delete(usuario_a_eliminar)
     session.commit()
         
     return session.query(Usuarios).all()
+    
 
 
 
@@ -92,6 +86,7 @@ def eliminar_usuario(usuario_un_a_econtrar: str):
 
 @bienestar.get("/bienestar/usuariosRol", response_model=list[RolEsquema])
 def leer_base_datos_roles():
+
     return session.query(Rol).all()
 
 @bienestar.post("/bienestar/usuariosRol", response_model= list[RolEsquema])
@@ -103,16 +98,17 @@ def ingresar_rol(nuevo_rol: str):
 
 @bienestar.put("/bienestar/usuariosRol/{rol_id}", response_model= RolEsquema)
 def modificar_nombre_rol(rol_a_econtrar: int,datos_nuevo_rol: str):
-    
+
     rol_a_modificar = session.query(Rol).get(rol_a_econtrar)
     rol_a_modificar.rol =datos_nuevo_rol
     session.commit()
     
     return session.query(Rol).get(rol_a_econtrar)
+    
 
 @bienestar.delete("/bienestar/usuariosRol/{rol_id}")
 def eliminar_rol(rol_a_econtrar: int):
-        
+
     rol_a_eliminar = session.query(Rol).get(rol_a_econtrar)
     session.delete(rol_a_eliminar)
     session.commit()
@@ -131,22 +127,28 @@ def ingresar_usuario_rol(usuario_un_a_buscar: str, rol_id_a_buscar: int):
 
 @bienestar.get("/bienestar/usuariosRoles/usuariosRol", response_model= list[UsuarioRolEsquema])
 def leer_roles_de_usuarios():
+
     return session.query(t_usuario_rol).all()
 
 @bienestar.delete("/bienestar/usuariosRoles/usuariosRol/{usuario_un}")
 def eliminar_usuario_y_rol(usuario_un_elim: str):
-        
+
     usuario_y_rol_a_eliminar = conn.execute(t_usuario_rol.delete().where(t_usuario_rol.c.usuario_un == usuario_un_elim))
     conn.commit()
         
     return "Usuario y rol eliminado"
-
+    
+    
 @bienestar.put("/bienestar/usuariosRoles/usuariosRol/{usuario_un}&{rol_id}")
 def modificar_usuario_y_rol(usuario_un_a_buscar: str, rol_id_nuevo: int):
 
     conn.execute(t_usuario_rol.update().values(rol_id=rol_id_nuevo).where(t_usuario_rol.c.usuario_un == usuario_un_a_buscar))
     conn.commit()
     return "Usuario y rol modificado correctamente"
+
+
+#---Peticiones que no usaremos de momento---#
+
 
 
 #Departamentos

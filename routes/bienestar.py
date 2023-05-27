@@ -1,45 +1,48 @@
 from fastapi import APIRouter, HTTPException
 
-#Conexion a la base de datos
-from  config.db import conn
-from  config.db import session
+# Conexion a la base de datos
+from config.db import conn
+from config.db import session
 
-#Modelos
+# Modelos
 from models.usuarios_roles_info import *
 from models.programas_facultades_departamentos import *
 
 
-#Esquemas
+# Esquemas
 from schemas.rolEsquema import *
 from schemas.usuarioEsquema import *
 from schemas.departamentoEsquema import *
 from schemas.facultadEsquema import *
 from schemas.programaEsquema import *
 
-#Lectura de archivos no dict
+# Lectura de archivos no dict
 import ast
 
 bienestar = APIRouter()
 
-#Usuarios
+# Usuarios
 
-@bienestar.get("/bienestar/usuarios", response_model= list[UsuarioEsquema], tags=["Usuarios"], summary="Retorna todos los usuarios",status_code=200)
+
+@bienestar.get("/bienestar/usuarios", response_model=list[UsuarioEsquema], tags=["Usuarios"], summary="Retorna todos los usuarios", status_code=200)
 def leer_usuarios():
     data = session.query(Usuarios).all()
     return data
 
-@bienestar.get("/bienestar/usuarios/{usuario_un}", response_model= UsuarioEsquema, tags=["Usuarios"], summary="Retorna un usuario",status_code=200)
+
+@bienestar.get("/bienestar/usuarios/{usuario_un}", response_model=UsuarioEsquema, tags=["Usuarios"], summary="Retorna un usuario", status_code=200)
 def buscar_un_usuario(usuario_un_a_buscar: str):
-    
+
     data = session.query(Usuarios).get(usuario_un_a_buscar)
     if data == None:
         raise HTTPException(status_code=404, detail="El usuario no existe")
     else:
         result = data
-    
+
     return result
 
-@bienestar.post("/bienestar/usuarios", response_model= UsuarioEsquema)
+
+@bienestar.post("/bienestar/usuarios", response_model=UsuarioEsquema, tags=["Usuarios"], summary="Ingresa un usuario", status_code=201)
 def ingresar_usuario(nuevo: UsuarioEsquema):
 
     conn.execute(Usuarios.__table__.insert().values(nuevo.dict()))
@@ -47,109 +50,224 @@ def ingresar_usuario(nuevo: UsuarioEsquema):
     return session.query(Usuarios).get(nuevo.usuario_un)
 
 
-@bienestar.put("/bienestar/usuarios/{usuario_un}&{estado}", response_model= UsuarioEsquema)
+@bienestar.put("/bienestar/usuarios/{usuario_un}&{estado}", response_model=UsuarioEsquema, tags=["Usuarios"], summary="Modifica el estado de un usuario", status_code=200)
 def modificar_estado_usuario(usuario_un_a_buscar: str, estado_nuevo: bool):
 
     usuario_a_modificar = session.query(Usuarios).get(usuario_un_a_buscar)
-    usuario_a_modificar.estado = estado_nuevo
-    session.commit()
-    return session.query(Usuarios).get(usuario_un_a_buscar)
+    if usuario_a_modificar:
+        usuario_a_modificar.estado = estado_nuevo
+        session.commit()
+        return session.query(Usuarios).get(usuario_un_a_buscar)
+    else:
+        return None
 
 
-@bienestar.put("/bienestar/usuarios/{usuario_un}", response_model= UsuarioEsquema)
-def modificar_datos_usuario(usuario_un_a_econtrar: str,datos_nuevos_usuario: UsuarioEsquema):
-    
+@bienestar.put("/bienestar/usuarios/{usuario_un}", response_model=UsuarioEsquema, tags=["Usuarios"], summary="Modifica los datos de un usuario", status_code=200)
+def modificar_datos_usuario(usuario_un_a_econtrar: str, datos_nuevos_usuario: UsuarioEsquema):
+
     usuario_a_modificar = session.query(Usuarios).get(usuario_un_a_econtrar)
-    usuario_a_modificar.estado =datos_nuevos_usuario.dict().get("estado")
-    usuario_a_modificar.nombres =datos_nuevos_usuario.dict().get("nombres")
-    usuario_a_modificar.apellidos =datos_nuevos_usuario.dict().get("apellidos")
-    usuario_a_modificar.documento =datos_nuevos_usuario.dict().get("documento")
-    usuario_a_modificar.tipo_documento =datos_nuevos_usuario.dict().get("tipo_documento")
-    session.commit()
-    
-    return session.query(Usuarios).get(usuario_a_modificar.usuario_un)
-    
+    if usuario_a_modificar:
+        usuario_a_modificar.estado = datos_nuevos_usuario.dict().get("estado")
+        usuario_a_modificar.nombres = datos_nuevos_usuario.dict().get("nombres")
+        usuario_a_modificar.apellidos = datos_nuevos_usuario.dict().get("apellidos")
+        usuario_a_modificar.documento = datos_nuevos_usuario.dict().get("documento")
+        usuario_a_modificar.tipo_documento = datos_nuevos_usuario.dict().get("tipo_documento")
+        session.commit()
+        return session.query(Usuarios).get(usuario_a_modificar.usuario_un)
+    else:
+        return None
 
-@bienestar.delete("/bienestar/usuarios/{usuario_un}")
+
+@bienestar.delete("/bienestar/usuarios/{usuario_un}", tags=["Usuarios"], summary="Elimina un usuario", status_code=204)
 def eliminar_usuario(usuario_un_a_econtrar: str):
 
     usuario_a_eliminar = session.query(Usuarios).get(usuario_un_a_econtrar)
     session.delete(usuario_a_eliminar)
     session.commit()
-        
+
     return session.query(Usuarios).all()
-    
+
+# Token web de los usuarios
+
+
+@bienestar.get("/bienestar/usuarios/web/{usuarioWeb}", response_model=dict, tags=["Usuarios"], summary="Retorna el web token de un usuario", status_code=200)
+def leer_usuario_token_web(usuario_web: str):
+    data = session.query(Usuarios).get(usuario_web)
+    respuesta = {}
+    respuesta["token"] = str(data.token_web) if data and data.token_web else None
+    respuesta["usuario"] = data.usuario_un if data else None
+    return respuesta
+
+
+@bienestar.put("/bienestar/usuarios/web/{usuarioWeb}&{tokenWeb}", tags=["Usuarios"],response_model=dict ,summary="Modifica el token web de un usuario", status_code=200)
+def modificar_token_usuario_web(usuario_web: str, token_nuevo: str):
+
+    usuario_a_modificar = session.query(Usuarios).get(usuario_web)
+    if usuario_a_modificar:
+        usuario_a_modificar.token_web = token_nuevo
+        session.commit()
+        respuesta = {}
+        data = session.query(Usuarios).get(usuario_a_modificar.usuario_un)
+        respuesta["token"] = data.token_web if data else None
+        respuesta["usuario"] = data.usuario_un if data else None
+        return respuesta
+    else:
+        return {}
+
+
+@bienestar.delete("/bienestar/usuarios/web/{usuarioWeb}", response_model=dict, tags=["Usuarios"], summary="Elimina el token web de un usuario", status_code=200)
+def eliminar_token_usuario_web(usuario_web: str):
+
+    usuario_a_modificar = session.query(Usuarios).get(usuario_web)
+    if usuario_a_modificar:
+        usuario_a_modificar.token_web = "0"
+        session.commit()
+        respuesta = {}
+        data = session.query(Usuarios).get(usuario_a_modificar.usuario_un)
+        respuesta["token"] = data.token_web if data else None
+        respuesta["usuario"] = data.usuario_un if data else None
+        return respuesta
+    else:
+        return {}
+
+
+# Token movil de los usuarios
+
+
+@bienestar.get("/bienestar/usuarios/movile/{usuarioMovile}", response_model=dict, tags=["Usuarios"], summary="Retorna el token movil de un usuario", status_code=200)
+def leer_usuario_token_movil(usuario_movile: str):
+    data = session.query(Usuarios).get(usuario_movile)
+    respuesta = {}
+    respuesta["token"] = str(data.token_movile) if data else None
+    respuesta["usuario"] = data.usuario_un if data else None
+
+    return respuesta
+
+
+@bienestar.put("/bienestar/usuarios/movile/{usuarioMovile}&{tokenMovile}", response_model=dict, tags=["Usuarios"], summary="Modifica el token movil de un usuario", status_code=200)
+def modificar_token_usuario_movil(usuario_movile: str, token_nuevo: str):
+
+    usuario_a_modificar = session.query(Usuarios).get(usuario_movile)
+    if usuario_a_modificar:
+        usuario_a_modificar.token_movile = token_nuevo
+        session.commit()
+        respuesta = {}
+        data = session.query(Usuarios).get(usuario_a_modificar.usuario_un)
+        respuesta["token"] = data.token_movile if data else None
+        respuesta["usuario"] = data.usuario_un if data else None
+        return respuesta
+    else:
+        return {}
+
+
+@bienestar.delete("/bienestar/usuarios/movile/{usuarioMovile}", response_model=dict, tags=["Usuarios"], summary="Elimina el token movil de un usuario", status_code=200)
+def eliminar_token_usuario_movil(usuario_movile: str):
+
+    usuario_a_modificar = session.query(Usuarios).get(usuario_movile)
+    if usuario_a_modificar:
+        usuario_a_modificar.token_movile = "0"
+        session.commit()
+        respuesta = {}
+        data = session.query(Usuarios).get(usuario_a_modificar.usuario_un)
+        respuesta["token"] = data.token_movile if data else None
+        respuesta["usuario"] = data.usuario_un if data else None
+        return respuesta
+    else:
+        return {}
 
 
 
-#Roles
+    usuario_a_modificar = session.query(Usuarios).get(usuario_movile)
+    if usuario_a_modificar:
+        usuario_a_modificar.token_movil = token_nuevo
+        session.commit()
+        respuesta = {}
+        data = session.query(Usuarios).get(usuario_a_modificar.usuario_un)
+        respuesta["token"] = data.token_movile if data else None
+        respuesta["usuario"] = data.usuario_un if data else None
+        return respuesta
+    else:
+        return {}
 
-@bienestar.get("/bienestar/usuariosRol", response_model=list[RolEsquema])
+
+# Roles
+
+
+@bienestar.get("/bienestar/usuariosRol", response_model=list[RolEsquema], tags=["Roles"], summary="Retorna todos los roles", status_code=200)
 def leer_base_datos_roles():
 
     return session.query(Rol).all()
 
-@bienestar.post("/bienestar/usuariosRol", response_model= list[RolEsquema])
+
+@bienestar.post("/bienestar/usuariosRol", response_model=list[RolEsquema], tags=["Roles"], summary="Ingresa un nuevo rol", status_code=201)
 def ingresar_rol(nuevo_rol: str):
 
-    conn.execute(Rol.__table__.insert().values({"rol":nuevo_rol}))
+    conn.execute(Rol.__table__.insert().values({"rol": nuevo_rol}))
     conn.commit()
     return session.query(Rol).all()
 
-@bienestar.put("/bienestar/usuariosRol/{rol_id}", response_model= RolEsquema)
-def modificar_nombre_rol(rol_a_econtrar: int,datos_nuevo_rol: str):
+
+@bienestar.put("/bienestar/usuariosRol/{rol_id}", response_model=RolEsquema, tags=["Roles"], summary="Modifica el nombre de un rol", status_code=200)
+def modificar_nombre_rol(rol_a_econtrar: int, datos_nuevo_rol: str):
 
     rol_a_modificar = session.query(Rol).get(rol_a_econtrar)
-    rol_a_modificar.rol =datos_nuevo_rol
-    session.commit()
-    
-    return session.query(Rol).get(rol_a_econtrar)
-    
+    if rol_a_modificar:
+        rol_a_modificar.rol = datos_nuevo_rol
+        session.commit()
+        return session.query(Rol).get(rol_a_econtrar)
+    else:
+        return None
 
-@bienestar.delete("/bienestar/usuariosRol/{rol_id}")
+
+@bienestar.delete("/bienestar/usuariosRol/{rol_id}", tags=["Roles"], summary="Elimina un rol", status_code=200)
 def eliminar_rol(rol_a_econtrar: int):
 
     rol_a_eliminar = session.query(Rol).get(rol_a_econtrar)
     session.delete(rol_a_eliminar)
     session.commit()
-        
+
     return session.query(Rol).all()
 
 
-#Usuarios Roles
+# Usuarios Roles
 
-@bienestar.post("/bienestar/usuariosRoles/{usuario_un}&{rol_id}", response_model= list[UsuarioRolEsquema])
+@bienestar.post("/bienestar/usuariosRoles/{usuario_un}&{rol_id}", response_model=list[UsuarioRolEsquema], tags=["Usuarios Roles"], summary="Asigna un nuevo rol a un usuario", status_code=201)
 def ingresar_usuario_rol(usuario_un_a_buscar: str, rol_id_a_buscar: int):
-    
-    conn.execute(t_usuario_rol.insert().values(usuario_un=usuario_un_a_buscar,rol_id=rol_id_a_buscar))
+
+    conn.execute(t_usuario_rol.insert().values(
+        usuario_un=usuario_un_a_buscar, rol_id=rol_id_a_buscar))
     conn.commit()
     return session.query(t_usuario_rol).all()
 
-@bienestar.get("/bienestar/usuariosRoles/usuariosRol", response_model= list[UsuarioRolEsquema])
+
+@bienestar.get("/bienestar/usuariosRoles/usuariosRol", response_model=list[UsuarioRolEsquema], tags=["Usuarios Roles"], summary="Retorna todos los usuarios y sus roles", status_code=200)
 def leer_roles_de_usuarios():
 
     return session.query(t_usuario_rol).all()
 
-@bienestar.delete("/bienestar/usuariosRoles/usuariosRol/{usuario_un}")
+
+@bienestar.delete("/bienestar/usuariosRoles/usuariosRol/{usuario_un}", tags=["Usuarios Roles"], summary="Elimina la signacion de rol a un usuario", status_code=204)
 def eliminar_usuario_y_rol(usuario_un_elim: str):
 
-    usuario_y_rol_a_eliminar = conn.execute(t_usuario_rol.delete().where(t_usuario_rol.c.usuario_un == usuario_un_elim))
+    usuario_y_rol_a_eliminar = conn.execute(t_usuario_rol.delete().where(
+        t_usuario_rol.c.usuario_un == usuario_un_elim))
     conn.commit()
-        
+
     return "Usuario y rol eliminado"
-    
-    
-@bienestar.put("/bienestar/usuariosRoles/usuariosRol/{usuario_un}&{rol_id}")
+
+
+@bienestar.put("/bienestar/usuariosRoles/usuariosRol/{usuario_un}&{rol_id}", tags=["Usuarios Roles"], summary="Modifica la asignacion de rol a un usuario", status_code=200)
 def modificar_usuario_y_rol(usuario_un_a_buscar: str, rol_id_nuevo: int):
 
-    conn.execute(t_usuario_rol.update().values(rol_id=rol_id_nuevo).where(t_usuario_rol.c.usuario_un == usuario_un_a_buscar))
+    conn.execute(t_usuario_rol.update().values(rol_id=rol_id_nuevo).where(
+        t_usuario_rol.c.usuario_un == usuario_un_a_buscar))
     conn.commit()
     return "Usuario y rol modificado correctamente"
 
 
-#---Peticiones que no usaremos de momento---#
+# ---Peticiones que no usaremos de momento---#
 
-
+"""
 
 #Departamentos
 
@@ -366,3 +484,5 @@ def eliminar_historiaAcademica_de_estudiante(usuario_un: str):
     session.query(t_historia_academica_estudiantes).filter(t_historia_academica_estudiantes.c.usuario_un == usuario_un).delete()
     session.commit()
     return session.query(t_historia_academica_estudiantes).all()
+
+"""

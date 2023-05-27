@@ -10,7 +10,9 @@ from schemas.usuarioEsquema import InformacionPersonalEsquema
 
 estudiante = APIRouter()
 
-#InformacionPersonal
+"""
+
+#InformacionPersonas
 
 @estudiante.get("/estudiante/informacionPersonal/{usuario_un}", response_model= InformacionPersonalEsquema)
 def leer_informacion_personal_del_estudiante(usuario_un : str):
@@ -38,3 +40,4 @@ def eliminar_informacion_personal_del_estudiante(usuario_un: str):
     session.query(InformacionPersonal).filter(InformacionPersonal.usuario_un == usuario_un).delete()
     session.commit()
     return {"mensaje": "Informacion personal del estudiante eliminada"}
+"""

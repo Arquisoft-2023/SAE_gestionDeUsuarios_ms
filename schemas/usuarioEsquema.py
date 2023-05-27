@@ -9,6 +9,8 @@ class UsuarioEsquema(BaseModel):
     apellidos : str
     documento : str
     tipo_documento : bool
+    token_web : str
+    token_movile : str
 
     class Config:
         orm_mode = True

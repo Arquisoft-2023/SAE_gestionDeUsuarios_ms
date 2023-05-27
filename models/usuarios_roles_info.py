@@ -27,6 +27,10 @@ class Usuarios(Base):
     apellidos = Column(String, nullable=False)
     documento = Column(String, nullable=False)
     tipo_documento = Column(Boolean, nullable=False)
+    #Prototype 4 security - tokens
+    token_web = Column(String, nullable=False, default='0')
+    token_movile = Column(String, nullable=False, default='0')
+
 
 class InformacionPersonal(Usuarios):
     __tablename__ = 'informacion_personal'

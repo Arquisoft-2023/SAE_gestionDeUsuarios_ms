@@ -78,7 +78,7 @@ def modificar_datos_usuario(usuario_un_a_econtrar: str, datos_nuevos_usuario: Us
         return None
 
 
-@bienestar.delete("/bienestar/usuarios/{usuario_un}", tags=["Usuarios"], summary="Elimina un usuario", status_code=204)
+@bienestar.delete("/bienestar/usuarios/{usuario_un}", tags=["Usuarios"], summary="Elimina un usuario", status_code=200)
 def eliminar_usuario(usuario_un_a_econtrar: str):
 
     usuario_a_eliminar = session.query(Usuarios).get(usuario_un_a_econtrar)
@@ -94,7 +94,7 @@ def eliminar_usuario(usuario_un_a_econtrar: str):
 def leer_usuario_token_web(usuario_web: str):
     data = session.query(Usuarios).get(usuario_web)
     respuesta = {}
-    respuesta["token"] = str(data.token_web) if data and data.token_web else None
+    respuesta["token"] = str(data.token_web) if data else None
     respuesta["usuario"] = data.usuario_un if data else None
     return respuesta
 
@@ -140,7 +140,6 @@ def leer_usuario_token_movil(usuario_movile: str):
     respuesta = {}
     respuesta["token"] = str(data.token_movile) if data else None
     respuesta["usuario"] = data.usuario_un if data else None
-
     return respuesta
 
 
@@ -233,7 +232,7 @@ def eliminar_rol(rol_a_econtrar: int):
 
 @bienestar.post("/bienestar/usuariosRoles/{usuario_un}&{rol_id}", response_model=list[UsuarioRolEsquema], tags=["Usuarios Roles"], summary="Asigna un nuevo rol a un usuario", status_code=201)
 def ingresar_usuario_rol(usuario_un_a_buscar: str, rol_id_a_buscar: int):
-
+    
     conn.execute(t_usuario_rol.insert().values(
         usuario_un=usuario_un_a_buscar, rol_id=rol_id_a_buscar))
     conn.commit()
@@ -246,7 +245,7 @@ def leer_roles_de_usuarios():
     return session.query(t_usuario_rol).all()
 
 
-@bienestar.delete("/bienestar/usuariosRoles/usuariosRol/{usuario_un}", tags=["Usuarios Roles"], summary="Elimina la signacion de rol a un usuario", status_code=204)
+@bienestar.delete("/bienestar/usuariosRoles/usuariosRol/{usuario_un}", tags=["Usuarios Roles"], summary="Elimina la signacion de rol a un usuario", status_code=200)
 def eliminar_usuario_y_rol(usuario_un_elim: str):
 
     usuario_y_rol_a_eliminar = conn.execute(t_usuario_rol.delete().where(

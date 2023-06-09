@@ -2,7 +2,7 @@ version: "3"
 
 services:
 
-  
+
   #pgadmin4:
   #  image: dpage/pgadmin4
   #  container_name: visualizador_de_base_de_datos
@@ -19,20 +19,20 @@ services:
   #      aliases:
   #        - visualizador_de_base_de_datos
 
-  postgres:
-    image: postgres
-    container_name: sae_gestion_de_usuarios_db
-    restart: always
-    ports:
-      - "5433:5432"
-    env_file:
-      - .env
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      nodes-networks:
-        aliases:
-          - sae_gestion_de_usuarios_db
+  # postgres:
+  #   image: postgres
+  #   container_name: sae_gestion_de_usuarios_db
+  #   restart: always
+  #   ports:
+  #     - "5433:5432"
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   networks:
+  #     nodes-networks:
+  #       aliases:
+  #         - sae_gestion_de_usuarios_db
 
   sae_gestion_de_usuarios_ms:
     build: .
@@ -43,13 +43,13 @@ services:
       - .env
     ports:
       - "3021:8080"
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
     networks:
       nodes-networks:
         aliases:
           - sae_gestion_de_usuarios_ms
-    
+
 
 volumes:
   postgres-data:

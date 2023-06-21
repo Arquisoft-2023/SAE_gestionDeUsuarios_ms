@@ -1,8 +1,12 @@
 from fastapi import APIRouter, HTTPException
 
-# Conexion a la base de datos
+# Conexion a la base de datos maestra
 from config.db import conn
 from config.db import session
+
+# Conexion a la base de datos replica
+from config.db import conn_replica
+from config.db import session_replica
 
 # Modelos
 from models.usuarios_roles_info import *
@@ -26,14 +30,14 @@ bienestar = APIRouter()
 
 @bienestar.get("/bienestar/usuarios", response_model=list[UsuarioEsquema], tags=["Usuarios"], summary="Retorna todos los usuarios", status_code=200)
 def leer_usuarios():
-    data = session.query(Usuarios).all()
+    data = session_replica.query(Usuarios).all()
     return data
 
 
 @bienestar.get("/bienestar/usuarios/{usuario_un}", response_model=UsuarioEsquema, tags=["Usuarios"], summary="Retorna un usuario", status_code=200)
 def buscar_un_usuario(usuario_un_a_buscar: str):
 
-    data = session.query(Usuarios).get(usuario_un_a_buscar)
+    data = session_replica.query(Usuarios).get(usuario_un_a_buscar)
     if data == None:
         raise HTTPException(status_code=404, detail="El usuario no existe")
     else:
@@ -92,7 +96,7 @@ def eliminar_usuario(usuario_un_a_econtrar: str):
 
 @bienestar.get("/bienestar/usuarios/web/{usuarioWeb}", response_model=dict, tags=["Usuarios"], summary="Retorna el web token de un usuario", status_code=200)
 def leer_usuario_token_web(usuario_web: str):
-    data = session.query(Usuarios).get(usuario_web)
+    data = session_replica.query(Usuarios).get(usuario_web)
     respuesta = {}
     respuesta["token"] = str(data.token_web) if data else None
     respuesta["usuario"] = data.usuario_un if data else None
@@ -136,7 +140,7 @@ def eliminar_token_usuario_web(usuario_web: str):
 
 @bienestar.get("/bienestar/usuarios/movile/{usuarioMovile}", response_model=dict, tags=["Usuarios"], summary="Retorna el token movil de un usuario", status_code=200)
 def leer_usuario_token_movil(usuario_movile: str):
-    data = session.query(Usuarios).get(usuario_movile)
+    data = session_replica.query(Usuarios).get(usuario_movile)
     respuesta = {}
     respuesta["token"] = str(data.token_movile) if data else None
     respuesta["usuario"] = data.usuario_un if data else None
@@ -195,7 +199,7 @@ def eliminar_token_usuario_movil(usuario_movile: str):
 @bienestar.get("/bienestar/usuariosRol", response_model=list[RolEsquema], tags=["Roles"], summary="Retorna todos los roles", status_code=200)
 def leer_base_datos_roles():
 
-    return session.query(Rol).all()
+    return session_replica.query(Rol).all()
 
 
 @bienestar.post("/bienestar/usuariosRol", response_model=list[RolEsquema], tags=["Roles"], summary="Ingresa un nuevo rol", status_code=201)
@@ -242,7 +246,7 @@ def ingresar_usuario_rol(usuario_un_a_buscar: str, rol_id_a_buscar: int):
 @bienestar.get("/bienestar/usuariosRoles/usuariosRol", response_model=list[UsuarioRolEsquema], tags=["Usuarios Roles"], summary="Retorna todos los usuarios y sus roles", status_code=200)
 def leer_roles_de_usuarios():
 
-    return session.query(t_usuario_rol).all()
+    return session_replica.query(t_usuario_rol).all()
 
 
 @bienestar.delete("/bienestar/usuariosRoles/usuariosRol/{usuario_un}", tags=["Usuarios Roles"], summary="Elimina la signacion de rol a un usuario", status_code=200)
